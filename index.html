@@ -34,7 +34,7 @@
             <button class="flex items-center gap-2 bg-[#8165F3] hover:bg-[#6b50e0] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
                 <i data-lucide="calendar" class="w-4 h-4"></i> Tạo lịch
             </button>
-            <button class="flex items-center gap-2 bg-[#4285F4] hover:bg-[#3367D6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
+            <button id="add-subject-btn" class="flex items-center gap-2 bg-[#4285F4] hover:bg-[#3367D6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
                 <i data-lucide="plus" class="w-4 h-4"></i> Thêm môn
             </button>
             <button class="flex items-center gap-2 bg-[#0F9D58] hover:bg-[#0B8043] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95 ml-2 md:ml-4">
@@ -155,17 +155,21 @@
         }
         renderHeaders(days);
 
-        // Render Body Rows (7 rows)
-        const tableBody = document.getElementById('table-body');
-        for (let i = 0; i < 7; i++) {
+        // Function tạo một dòng mới
+        function createRow() {
             const tr = document.createElement('tr');
             
-            // Cột môn học
+            // Cột môn học (Có thêm nút Xóa)
             let tdSubject = document.createElement('td');
             tdSubject.innerHTML = `
-                <div class="flex items-center h-full">
-                    <div class="w-2 h-10 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
-                    <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-3 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
+                <div class="flex items-center h-full gap-2 group">
+                    <button type="button" class="delete-row-btn w-7 h-7 flex-shrink-0 bg-red-50 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm" title="Xóa môn">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                    <div class="flex items-center h-full flex-1">
+                        <div class="w-2 h-10 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
+                        <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-3 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
+                    </div>
                 </div>
             `;
             tr.appendChild(tdSubject);
@@ -195,11 +199,33 @@
                 `;
                 tr.appendChild(td);
             });
-            tableBody.appendChild(tr);
+            return tr;
         }
 
-        // Event delegation cho checkbox
+        // Render Body Rows (7 rows mặc định)
+        const tableBody = document.getElementById('table-body');
+        for (let i = 0; i < 7; i++) {
+            tableBody.appendChild(createRow());
+        }
+
+        // Xử lý nút "Thêm môn"
+        document.getElementById('add-subject-btn').addEventListener('click', () => {
+            const newRow = createRow();
+            tableBody.appendChild(newRow);
+            lucide.createIcons({ root: newRow });
+        });
+
+        // Event delegation cho checkbox và nút Xóa dòng
         document.body.addEventListener('click', function(e) {
+            // Xóa dòng
+            const deleteBtn = e.target.closest('.delete-row-btn');
+            if (deleteBtn) {
+                const row = deleteBtn.closest('tr');
+                if (row) row.remove();
+                return;
+            }
+
+            // Checkbox
             const btn = e.target.closest('.custom-checkbox');
             if (!btn) return;
 
