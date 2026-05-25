@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Học Của Leo</title>
+    <!-- Tailwind CSS qua CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        /* Loại bỏ style mặc định của input type="time" */
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#FDF5DA] p-4 md:p-8 flex flex-col items-center w-full">
+    
+    <!-- Top Controls -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm flex flex-wrap gap-4 items-center justify-between w-full max-w-[1200px] mb-6">
+        <div class="flex items-center gap-3 ml-2">
+            <span class="font-bold text-gray-800 text-sm">Công cụ:</span>
+            <input 
+                type="date" 
+                value="2026-05-21" 
+                class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50" 
+            />
+        </div>
+        <div class="flex items-center gap-3">
+            <button class="flex items-center gap-2 bg-[#8165F3] hover:bg-[#6b50e0] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
+                <i data-lucide="calendar" class="w-4 h-4"></i> Tạo lịch
+            </button>
+            <button class="flex items-center gap-2 bg-[#4285F4] hover:bg-[#3367D6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
+                <i data-lucide="plus" class="w-4 h-4"></i> Thêm môn
+            </button>
+            <button class="flex items-center gap-2 bg-[#0F9D58] hover:bg-[#0B8043] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95 ml-2 md:ml-4">
+                <i data-lucide="download" class="w-4 h-4"></i> Tải PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Schedule Board -->
+    <div class="bg-white rounded-[32px] p-6 md:p-12 shadow-lg border-[3px] border-dashed border-[#F29C6E] w-full max-w-[1200px] relative">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <h1 contenteditable="true" spellcheck="false" class="single-line text-4xl md:text-5xl font-black text-[#EF6C00] tracking-tight uppercase outline-none focus:bg-orange-50 rounded-lg px-2 -ml-2 transition-colors cursor-text" style="text-shadow: 2px 2px 0px #FFF3E0">
+                LỊCH HỌC CỦA LEO 🦁
+            </h1>
+            <div class="text-right w-full md:w-auto relative">
+                <p class="text-gray-400 italic text-xs mb-1">Người thiết kế: Trương Dư Ngọc Trâm</p>
+                <p id="month-display" class="single-line text-[#4285F4] font-bold text-lg outline-none focus:bg-blue-50 rounded px-2 -mr-2 transition-colors">Tháng 05/2026</p>
+                <div class="relative flex items-center justify-end gap-1 mt-1" id="period-container">
+                    <span class="text-[#EF6C00] font-medium text-sm">Giai đoạn:</span>
+                    <button id="period-btn" class="text-[#EF6C00] font-medium text-sm outline-none hover:bg-orange-50 focus:bg-orange-50 rounded px-1 cursor-pointer transition-colors">21/05 đến 03/06/2026</button>
+                    
+                    <!-- Dropdown chọn ngày -->
+                    <div id="date-pickers" class="absolute top-full right-0 mt-2 bg-white shadow-xl border border-gray-100 rounded-xl p-3 hidden flex-col gap-3 z-50 w-max">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold text-gray-500 w-8">Từ:</span>
+                            <input type="date" id="start-date" class="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-orange-400 text-gray-700">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold text-gray-500 w-8">Đến:</span>
+                            <input type="date" id="end-date" class="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-orange-400 text-gray-700">
+                        </div>
+                        <button id="apply-dates" class="w-full bg-[#EF6C00] text-white rounded-lg py-1.5 text-sm font-bold mt-1 hover:bg-[#D35400] transition-colors shadow-sm">Xác nhận</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Greeting Banner -->
+        <div class="flex justify-center mb-10">
+            <div contenteditable="true" spellcheck="false" class="single-line bg-[#EEF2FF] text-[#4F46E5] px-8 py-2.5 rounded-full text-sm font-bold inline-flex items-center gap-2 shadow-sm border border-indigo-100 outline-none focus:ring-2 focus:ring-indigo-300 cursor-text transition-all min-w-[300px] text-center">
+                ✨ "Cố lên Leo nhé! Chúc con một tuần học tập thật vui!" ✨
+            </div>
+        </div>
+
+        <!-- Schedule Table -->
+        <div class="w-full overflow-x-auto pb-6">
+            <table class="w-full min-w-[900px] border-separate" style="border-spacing: 8px 12px">
+                <thead>
+                    <tr id="table-header">
+                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-6 font-bold text-center uppercase tracking-wide shadow-sm w-[280px]">Nội dung học</th>
+                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-4 font-bold text-center uppercase tracking-wide shadow-sm w-[100px]">Giờ</th>
+                        <!-- Javascript sẽ render thêm các ngày ở đây -->
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Javascript sẽ render thêm các dòng ở đây -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Goal Section -->
+        <div class="mt-8 flex justify-center">
+            <div class="border-[3px] border-dashed border-[#F29C6E] rounded-full px-10 py-5 flex items-center gap-8 bg-[#FEFAF3] shadow-sm">
+                <div class="text-center">
+                    <p class="text-[#F29C6E] font-bold text-xs uppercase tracking-widest mb-1">Mục tiêu</p>
+                    <p class="text-[#D35400] font-black text-2xl">10 SAO</p>
+                </div>
+                <div class="flex gap-2.5" id="stars-container">
+                    <!-- Javascript sẽ render 10 ngôi sao ở đây -->
+                </div>
+                <div class="text-4xl pl-2">🎁</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data for headers (Ngày trong tuần)
+        let days = [
+            { day: 'T5', date: '21', type: 'green' },
+            { day: 'T6', date: '22', type: 'green' },
+            { day: 'T7', date: '23', type: 'green' },
+            { day: 'CN', date: '24', type: 'orange' },
+            { day: 'T2', date: '25', type: 'green' },
+            { day: 'T3', date: '26', type: 'green' },
+            { day: 'T4', date: '27', type: 'green' },
+            { day: 'T5', date: '28', type: 'green' },
+            { day: 'T6', date: '29', type: 'green' },
+            { day: 'T7', date: '30', type: 'green' },
+            { day: 'CN', date: '31', type: 'orange' },
+            { day: 'T2', date: '1', type: 'green' },
+            { day: 'T3', date: '2', type: 'green' },
+            { day: 'T4', date: '3', type: 'green' },
+        ];
+
+        // Render Headers
+        const tableHeader = document.getElementById('table-header');
+        function renderHeaders(daysData) {
+            // Keep first 2 columns
+            while (tableHeader.children.length > 2) {
+                tableHeader.removeChild(tableHeader.lastChild);
+            }
+            daysData.forEach(d => {
+                const isWeekend = d.type === 'orange';
+                const bgColor = isWeekend ? 'bg-[#FCE6D5]' : 'bg-[#DDF4EA]';
+                const textColor = isWeekend ? 'text-[#E65100]' : 'text-[#00695C]';
+                
+                const th = document.createElement('th');
+                th.className = `${bgColor} rounded-xl p-2 min-w-[50px] text-center shadow-sm border border-transparent`;
+                th.innerHTML = `
+                    <div class="text-[11px] font-bold ${textColor} mb-1.5 uppercase">${d.day}</div>
+                    <div class="text-sm font-black bg-white rounded-lg w-8 h-8 mx-auto flex items-center justify-center shadow-sm ${textColor}">
+                        ${d.date}
+                    </div>
+                `;
+                tableHeader.appendChild(th);
+            });
+        }
+        renderHeaders(days);
+
+        // Render Body Rows (7 rows)
+        const tableBody = document.getElementById('table-body');
+        for (let i = 0; i < 7; i++) {
+            const tr = document.createElement('tr');
+            
+            // Cột môn học
+            let tdSubject = document.createElement('td');
+            tdSubject.innerHTML = `
+                <div class="flex items-center h-full">
+                    <div class="w-2 h-10 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
+                    <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-3 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
+                </div>
+            `;
+            tr.appendChild(tdSubject);
+
+            // Cột thời gian
+            let tdTime = document.createElement('td');
+            tdTime.innerHTML = `
+                <input type="time" value="00:00" class="w-full border-2 border-gray-100 bg-white rounded-full px-2 py-3 text-center focus:outline-none focus:border-[#F29C6E] text-xs font-bold text-gray-600 shadow-sm transition-colors" />
+            `;
+            tr.appendChild(tdTime);
+
+            // Cột checkbox tương ứng từng ngày
+            days.forEach((d, j) => {
+                const isWeekend = d.type === 'orange';
+                let td = document.createElement('td');
+                td.className = "text-center bg-gray-50/50 rounded-xl px-1";
+                
+                const defaultBg = isWeekend ? 'bg-[#FFF3E0]' : 'bg-white';
+                const borderCol = isWeekend ? 'border-orange-200' : 'border-indigo-200';
+                
+                td.innerHTML = `
+                    <div class="flex justify-center items-center h-full py-2">
+                        <button type="button" data-bg="${defaultBg}" data-border="${borderCol}" class="custom-checkbox w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all ${defaultBg} ${borderCol} text-transparent hover:border-indigo-300">
+                            <i data-lucide="check" style="stroke-width: 3;" class="w-4 h-4 opacity-0 transition-opacity"></i>
+                        </button>
+                    </div>
+                `;
+                tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
+        }
+
+        // Event delegation cho checkbox
+        document.body.addEventListener('click', function(e) {
+            const btn = e.target.closest('.custom-checkbox');
+            if (!btn) return;
+
+            const icon = btn.querySelector('svg');
+            const isChecked = btn.classList.contains('bg-indigo-100');
+            const defaultBg = btn.dataset.bg;
+            const borderCol = btn.dataset.border;
+            
+            if (isChecked) {
+                // Bỏ chọn
+                btn.classList.remove('bg-indigo-100', 'border-indigo-400', 'text-indigo-600', 'scale-110', 'shadow-sm');
+                btn.classList.add(defaultBg, borderCol, 'text-transparent');
+                icon.classList.replace('opacity-100', 'opacity-0');
+            } else {
+                // Chọn
+                btn.classList.remove(defaultBg, borderCol, 'text-transparent');
+                btn.classList.add('bg-indigo-100', 'border-indigo-400', 'text-indigo-600', 'scale-110', 'shadow-sm');
+                icon.classList.replace('opacity-0', 'opacity-100');
+            }
+        });
+
+        // Xử lý Popup Chọn Ngày
+        const periodBtn = document.getElementById('period-btn');
+        const datePickers = document.getElementById('date-pickers');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const applyDatesBtn = document.getElementById('apply-dates');
+        const monthDisplay = document.getElementById('month-display');
+
+        // Setup giá trị mặc định cho picker
+        startDateInput.value = '2026-05-21';
+        endDateInput.value = '2026-06-03';
+
+        periodBtn.addEventListener('click', (e) => {
+            datePickers.classList.toggle('hidden');
+            datePickers.classList.toggle('flex');
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!periodBtn.contains(e.target) && !datePickers.contains(e.target)) {
+                datePickers.classList.add('hidden');
+                datePickers.classList.remove('flex');
+            }
+        });
+
+        function formatDateToDDMMYYYY(dateStr, includeYear = true) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return includeYear ? `${day}/${month}/${year}` : `${day}/${month}`;
+        }
+
+        function getMonthText(startStr, endStr) {
+            if (!startStr || !endStr) return 'Tháng ...';
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            const startMonth = String(start.getMonth() + 1).padStart(2, '0');
+            const endMonth = String(end.getMonth() + 1).padStart(2, '0');
+            const startYear = start.getFullYear();
+            const endYear = end.getFullYear();
+
+            if (startMonth === endMonth && startYear === endYear) {
+                return `Tháng ${startMonth}/${startYear}`;
+            } else if (startYear === endYear) {
+                return `Tháng ${startMonth} - ${endMonth}/${startYear}`;
+            } else {
+                return `Tháng ${startMonth}/${startYear} - ${endMonth}/${endYear}`;
+            }
+        }
+
+        applyDatesBtn.addEventListener('click', () => {
+            const start = startDateInput.value;
+            const end = endDateInput.value;
+            
+            if (start && end) {
+                const startFormatted = formatDateToDDMMYYYY(start, false);
+                const endFormatted = formatDateToDDMMYYYY(end, true);
+                
+                // Update Texts
+                periodBtn.innerText = `${startFormatted} đến ${endFormatted}`;
+                monthDisplay.innerText = getMonthText(start, end);
+                
+                // Update Table Dates based on start date
+                const d = new Date(start);
+                const daysArr = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                const newDays = [];
+                for (let i = 0; i < 14; i++) {
+                    const tempD = new Date(d);
+                    tempD.setDate(d.getDate() + i);
+                    const dayOfWeek = daysArr[tempD.getDay()];
+                    newDays.push({
+                        day: dayOfWeek,
+                        date: tempD.getDate(),
+                        type: dayOfWeek === 'CN' ? 'orange' : 'green'
+                    });
+                }
+                days = newDays;
+                renderHeaders(days);
+
+                // Update checkboxes dataset for color scheme
+                Array.from(tableBody.children).forEach(tr => {
+                    for (let i = 0; i < 14; i++) {
+                        const td = tr.children[i + 2];
+                        const btn = td.querySelector('.custom-checkbox');
+                        if(btn) {
+                            const isWeekend = days[i].type === 'orange';
+                            const defaultBg = isWeekend ? 'bg-[#FFF3E0]' : 'bg-white';
+                            const borderCol = isWeekend ? 'border-orange-200' : 'border-indigo-200';
+                            
+                            // remove old defaults if not checked
+                            if (!btn.classList.contains('bg-indigo-100')) {
+                                btn.classList.remove(btn.dataset.bg, btn.dataset.border);
+                                btn.classList.add(defaultBg, borderCol);
+                            }
+                            
+                            btn.dataset.bg = defaultBg;
+                            btn.dataset.border = borderCol;
+                        }
+                    }
+                });
+
+                datePickers.classList.add('hidden');
+                datePickers.classList.remove('flex');
+            }
+        });
+
+        // Render Stars
+        const starsContainer = document.getElementById('stars-container');
+        for (let i = 0; i < 10; i++) {
+            const div = document.createElement('div');
+            div.className = "bg-white p-1.5 rounded-full shadow-sm border border-gray-100";
+            div.innerHTML = `<i data-lucide="star" class="w-6 h-6 text-gray-200 fill-gray-100"></i>`;
+            starsContainer.appendChild(div);
+        }
+
+        // Khởi tạo toàn bộ icon của lucide sau khi DOM render xong
+        lucide.createIcons();
+
+        // Ngăn không cho xuống dòng khi ấn Enter ở các mục sửa chữ (single-line)
+        document.querySelectorAll('.single-line').forEach(el => {
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+            // Select all text on first click for easier editing
+            el.addEventListener('focus', function() {
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            });
+        });
+    </script>
+</body>
+</html>
