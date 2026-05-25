@@ -82,11 +82,11 @@
 
         <!-- Schedule Table -->
         <div class="w-full overflow-x-auto pb-6">
-            <table class="w-full min-w-[900px] border-separate" style="border-spacing: 8px 12px">
+            <table class="w-full border-separate" style="border-spacing: 6px 12px">
                 <thead>
                     <tr id="table-header">
-                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-6 font-bold text-center uppercase tracking-wide shadow-sm w-[280px]">Nội dung học</th>
-                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-4 font-bold text-center uppercase tracking-wide shadow-sm w-[100px]">Giờ</th>
+                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-6 font-bold text-center uppercase tracking-wide shadow-sm w-[99%] min-w-[200px]">Nội dung học</th>
+                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-2 font-bold text-center uppercase tracking-wide shadow-sm w-[80px] min-w-[80px]">Giờ</th>
                         <!-- Javascript sẽ render thêm các ngày ở đây -->
                     </tr>
                 </thead>
@@ -143,10 +143,10 @@
                 const textColor = isWeekend ? 'text-[#E65100]' : 'text-[#00695C]';
                 
                 const th = document.createElement('th');
-                th.className = `${bgColor} rounded-xl p-2 min-w-[50px] text-center shadow-sm border border-transparent`;
+                th.className = `${bgColor} rounded-xl p-1.5 min-w-[42px] w-[42px] text-center shadow-sm border border-transparent`;
                 th.innerHTML = `
-                    <div class="text-[11px] font-bold ${textColor} mb-1.5 uppercase">${d.day}</div>
-                    <div class="text-sm font-black bg-white rounded-lg w-8 h-8 mx-auto flex items-center justify-center shadow-sm ${textColor}">
+                    <div class="text-[10px] font-bold ${textColor} mb-1.5 uppercase">${d.day}</div>
+                    <div class="text-xs font-black bg-white rounded-lg w-7 h-7 mx-auto flex items-center justify-center shadow-sm ${textColor}">
                         ${d.date}
                     </div>
                 `;
@@ -162,14 +162,12 @@
             // Cột môn học (Có thêm nút Xóa)
             let tdSubject = document.createElement('td');
             tdSubject.innerHTML = `
-                <div class="flex items-center h-full gap-2 group">
-                    <button type="button" class="delete-row-btn w-7 h-7 flex-shrink-0 bg-red-50 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm" title="Xóa môn">
-                        <i data-lucide="x" class="w-4 h-4"></i>
+                <div class="relative flex items-center h-full w-full group">
+                    <button type="button" class="absolute -left-8 top-1/2 -translate-y-1/2 delete-row-btn w-6 h-6 flex-shrink-0 bg-red-100 hover:bg-red-500 text-red-500 hover:text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm z-20" title="Xóa môn">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
                     </button>
-                    <div class="flex items-center h-full flex-1">
-                        <div class="w-2 h-10 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
-                        <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-3 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
-                    </div>
+                    <div class="w-2 h-10 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
+                    <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-3 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
                 </div>
             `;
             tr.appendChild(tdSubject);
@@ -185,15 +183,15 @@
             days.forEach((d, j) => {
                 const isWeekend = d.type === 'orange';
                 let td = document.createElement('td');
-                td.className = "text-center bg-gray-50/50 rounded-xl px-1";
+                td.className = "text-center bg-gray-50/50 rounded-xl px-0.5";
                 
                 const defaultBg = isWeekend ? 'bg-[#FFF3E0]' : 'bg-white';
                 const borderCol = isWeekend ? 'border-orange-200' : 'border-indigo-200';
                 
                 td.innerHTML = `
                     <div class="flex justify-center items-center h-full py-2">
-                        <button type="button" data-bg="${defaultBg}" data-border="${borderCol}" class="custom-checkbox w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all ${defaultBg} ${borderCol} text-transparent hover:border-indigo-300">
-                            <i data-lucide="check" style="stroke-width: 3;" class="w-4 h-4 opacity-0 transition-opacity"></i>
+                        <button type="button" data-bg="${defaultBg}" data-border="${borderCol}" class="custom-checkbox w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${defaultBg} ${borderCol} text-transparent hover:border-indigo-300">
+                            <i data-lucide="check" style="stroke-width: 3;" class="w-3.5 h-3.5 opacity-0 transition-opacity"></i>
                         </button>
                     </div>
                 `;
