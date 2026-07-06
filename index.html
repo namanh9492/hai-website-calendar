@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch Học Của Leo</title>
+    <title>Lịch Học Của Dâu Tây</title>
     <!-- Tailwind CSS qua CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Thư viện html2pdf.js để xuất file PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -15,6 +17,119 @@
         /* Loại bỏ style mặc định của input type="time" */
         input[type="time"]::-webkit-calendar-picker-indicator {
             cursor: pointer;
+        }
+        /* Ẩn nút xóa khi tạo PDF */
+        .pdf-exporting .delete-row-btn {
+            display: none !important;
+        }
+        /* Tối ưu hóa khi xuất PDF để gói gọn trong 1 trang A4 Landscape */
+        .pdf-exporting {
+            padding: 0.5rem 0.75rem !important;
+            max-width: 100% !important;
+            border-radius: 20px !important;
+            border-width: 2px !important;
+        }
+        .pdf-exporting h1 {
+            font-size: 1.8rem !important;
+        }
+        .pdf-exporting .mb-6 {
+            margin-bottom: 0.5rem !important;
+        }
+        .pdf-exporting .mb-8 {
+            margin-bottom: 0.5rem !important;
+        }
+        .pdf-exporting .mb-10 {
+            margin-bottom: 0.5rem !important;
+        }
+        .pdf-exporting .mb-6 > div,
+        .pdf-exporting .mb-10 > div {
+            padding: 0.3rem 1.25rem !important;
+            min-width: 200px !important;
+            font-size: 0.75rem !important;
+        }
+        .pdf-exporting table {
+            border-spacing: 4px 6px !important;
+        }
+        .pdf-exporting th {
+            padding: 0.2rem 0.25rem !important;
+        }
+        .pdf-exporting th div.text-\[10px\] {
+            margin-bottom: 0.15rem !important;
+        }
+        .pdf-exporting th div.w-7.h-7 {
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+            font-size: 0.75rem !important;
+        }
+        .pdf-exporting td input[type="text"] {
+            padding: 0.35rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        .pdf-exporting td div.h-8 {
+            height: 1.6rem !important;
+        }
+        .pdf-exporting td input[type="time"] {
+            padding: 0.35rem 0.25rem !important;
+            font-size: 0.7rem !important;
+        }
+        .pdf-exporting td .custom-checkbox {
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            border-width: 1.5px !important;
+        }
+        .pdf-exporting td .custom-checkbox svg {
+            width: 0.75rem !important;
+            height: 0.75rem !important;
+        }
+        .pdf-exporting td .py-2 {
+            padding-top: 0.2rem !important;
+            padding-bottom: 0.2rem !important;
+        }
+        /* Đưa bảng căn lề chuẩn bên trong khung vẽ PDF (bỏ bù âm lề của nút xóa) */
+        .pdf-exporting .overflow-x-auto {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+        }
+        /* Thu nhỏ chiều rộng các cột để bảng không bị tràn lề A4 */
+        .pdf-exporting th:first-child,
+        .pdf-exporting td:first-child {
+            min-width: 140px !important;
+            width: 140px !important;
+        }
+        .pdf-exporting th:nth-child(2),
+        .pdf-exporting td:nth-child(2) {
+            min-width: 60px !important;
+            width: 60px !important;
+        }
+        .pdf-exporting th:not(:first-child):not(:nth-child(2)),
+        .pdf-exporting td:not(:first-child):not(:nth-child(2)) {
+            min-width: 32px !important;
+            width: 32px !important;
+        }
+        .pdf-exporting .mt-2 {
+            margin-top: 0.25rem !important;
+        }
+        .pdf-exporting .mt-2 > div {
+            padding: 0.2rem 1rem !important;
+            gap: 0.5rem !important;
+            border-width: 2px !important;
+        }
+        .pdf-exporting .mt-2 p.text-2xl {
+            font-size: 1.1rem !important;
+        }
+        .pdf-exporting .mt-2 p.text-xs {
+            font-size: 0.65rem !important;
+        }
+        .pdf-exporting .mt-2 #stars-container {
+            gap: 0.3rem !important;
+        }
+        .pdf-exporting .mt-2 #stars-container svg {
+            width: 1.15rem !important;
+            height: 1.15rem !important;
+        }
+        .pdf-exporting .mt-2 .text-4xl {
+            font-size: 1.25rem !important;
+            padding-left: 0.25rem !important;
         }
     </style>
 </head>
@@ -25,28 +140,29 @@
         <div class="flex items-center gap-3 ml-2">
             <span class="font-bold text-gray-800 text-sm">Công cụ:</span>
             <input 
+                id="tool-date-input"
                 type="date" 
                 value="2026-05-21" 
                 class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50" 
             />
         </div>
         <div class="flex items-center gap-3">
-            <button class="flex items-center gap-2 bg-[#8165F3] hover:bg-[#6b50e0] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
+            <button id="create-calendar-btn" class="flex items-center gap-2 bg-[#8165F3] hover:bg-[#6b50e0] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
                 <i data-lucide="calendar" class="w-4 h-4"></i> Tạo lịch
             </button>
             <button id="add-subject-btn" class="flex items-center gap-2 bg-[#4285F4] hover:bg-[#3367D6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95">
                 <i data-lucide="plus" class="w-4 h-4"></i> Thêm môn
             </button>
-            <button class="flex items-center gap-2 bg-[#0F9D58] hover:bg-[#0B8043] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95 ml-2 md:ml-4">
+            <button id="download-pdf-btn" class="flex items-center gap-2 bg-[#0F9D58] hover:bg-[#0B8043] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-95 ml-2 md:ml-4">
                 <i data-lucide="download" class="w-4 h-4"></i> Tải PDF
             </button>
         </div>
     </div>
 
     <!-- Main Schedule Board -->
-    <div class="bg-white rounded-[32px] p-6 md:p-12 shadow-lg border-[3px] border-dashed border-[#F29C6E] w-full max-w-[1200px] relative">
+    <div id="schedule-board" class="bg-white rounded-[32px] p-4 md:px-4 md:py-5 shadow-lg border-[3px] border-dashed border-[#F29C6E] w-full max-w-[1200px] relative">
         <!-- Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <h1 contenteditable="true" spellcheck="false" class="single-line text-4xl md:text-5xl font-black text-[#EF6C00] tracking-tight uppercase outline-none focus:bg-orange-50 rounded-lg px-2 -ml-2 transition-colors cursor-text" style="text-shadow: 2px 2px 0px #FFF3E0">
                 LỊCH HỌC CỦA DÂU TÂY 🍓
             </h1>
@@ -74,19 +190,19 @@
         </div>
         
         <!-- Greeting Banner -->
-        <div class="flex justify-center mb-10">
+        <div class="flex justify-center mb-6">
             <div contenteditable="true" spellcheck="false" class="single-line bg-[#EEF2FF] text-[#4F46E5] px-8 py-2.5 rounded-full text-sm font-bold inline-flex items-center gap-2 shadow-sm border border-indigo-100 outline-none focus:ring-2 focus:ring-indigo-300 cursor-text transition-all min-w-[300px] text-center">
                 ✨ "Cố lên Dâu Tây nhé! Chúc con một tuần học tập thật vui!" ✨
             </div>
         </div>
 
         <!-- Schedule Table -->
-        <div class="overflow-x-auto pb-6 pl-10 -ml-10">
-            <table class="w-full border-separate" style="border-spacing: 6px 12px">
+        <div class="overflow-x-auto pb-2 pl-8 -ml-8">
+            <table class="w-full border-separate" style="border-spacing: 6px 8px">
                 <thead>
                     <tr id="table-header">
-                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-6 font-bold text-center uppercase tracking-wide shadow-sm w-[99%] min-w-[200px]">Nội dung học</th>
-                        <th class="bg-[#F29C6E] text-white rounded-xl py-3 px-2 font-bold text-center uppercase tracking-wide shadow-sm w-[80px] min-w-[80px]">Giờ</th>
+                        <th class="bg-[#F29C6E] text-white rounded-xl py-2 px-6 font-bold text-center uppercase tracking-wide shadow-sm w-[99%] min-w-[200px]">Nội dung học</th>
+                        <th class="bg-[#F29C6E] text-white rounded-xl py-2 px-2 font-bold text-center uppercase tracking-wide shadow-sm w-[80px] min-w-[80px]">Giờ</th>
                         <!-- Javascript sẽ render thêm các ngày ở đây -->
                     </tr>
                 </thead>
@@ -97,8 +213,8 @@
         </div>
 
         <!-- Goal Section -->
-        <div class="mt-8 flex justify-center">
-            <div class="border-[3px] border-dashed border-[#F29C6E] rounded-full px-10 py-5 flex items-center gap-8 bg-[#FEFAF3] shadow-sm">
+        <div class="mt-2 flex justify-center">
+            <div class="border-[3px] border-dashed border-[#F29C6E] rounded-full px-6 py-2 flex items-center gap-8 bg-[#FEFAF3] shadow-sm">
                 <div class="text-center">
                     <p class="text-[#F29C6E] font-bold text-xs uppercase tracking-widest mb-1">Mục tiêu</p>
                     <p class="text-[#D35400] font-black text-2xl">10 SAO</p>
@@ -106,29 +222,48 @@
                 <div class="flex gap-2.5" id="stars-container">
                     <!-- Javascript sẽ render 10 ngôi sao ở đây -->
                 </div>
-                <div class="text-4xl pl-2">🎁</div>
+                <div class="text-3xl pl-1">🎁</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Data for headers (Ngày trong tuần)
-        let days = [
-            { day: 'T5', date: '21', type: 'green' },
-            { day: 'T6', date: '22', type: 'green' },
-            { day: 'T7', date: '23', type: 'green' },
-            { day: 'CN', date: '24', type: 'orange' },
-            { day: 'T2', date: '25', type: 'green' },
-            { day: 'T3', date: '26', type: 'green' },
-            { day: 'T4', date: '27', type: 'green' },
-            { day: 'T5', date: '28', type: 'green' },
-            { day: 'T6', date: '29', type: 'green' },
-            { day: 'T7', date: '30', type: 'green' },
-            { day: 'CN', date: '31', type: 'orange' },
-            { day: 'T2', date: '1', type: 'green' },
-            { day: 'T3', date: '2', type: 'green' },
-            { day: 'T4', date: '3', type: 'green' },
-        ];
+        // Hàm tính ngày thứ 2 của tuần hiện tại
+        function getMondayOfCurrentWeek() {
+            const today = new Date();
+            const day = today.getDay(); // 0: Chủ nhật, 1: Thứ 2, ..., 6: Thứ 7
+            const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(today.setDate(diff));
+        }
+
+        // Định dạng Date sang yyyy-mm-dd để gán vào input
+        function formatDateToYYYYMMDD(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        const mondayDate = getMondayOfCurrentWeek();
+        const startValDefault = formatDateToYYYYMMDD(mondayDate);
+        
+        const sundayDate = new Date(mondayDate);
+        sundayDate.setDate(mondayDate.getDate() + 13);
+        const endValDefault = formatDateToYYYYMMDD(sundayDate);
+
+        // Tạo mảng days gồm 14 ngày từ thứ 2 tuần hiện tại
+        const daysArr = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        let days = [];
+        for (let i = 0; i < 14; i++) {
+            const tempD = new Date(mondayDate);
+            tempD.setDate(mondayDate.getDate() + i);
+            const dayOfWeek = daysArr[tempD.getDay()];
+            days.push({
+                day: dayOfWeek,
+                date: tempD.getDate(),
+                type: dayOfWeek === 'CN' ? 'orange' : 'green'
+            });
+        }
 
         // Render Headers
         const tableHeader = document.getElementById('table-header');
@@ -166,8 +301,8 @@
                     <button type="button" class="absolute -left-8 top-1/2 -translate-y-1/2 delete-row-btn w-6 h-6 flex-shrink-0 bg-red-100 hover:bg-red-500 text-red-500 hover:text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm z-20" title="Xóa môn">
                         <i data-lucide="x" class="w-3.5 h-3.5"></i>
                     </button>
-                    <div class="w-2 h-10 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
-                    <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-3 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
+                    <div class="w-2 h-8 bg-[#F29C6E] rounded-l-lg -mr-2 z-10"></div>
+                    <input type="text" placeholder="Tên môn học" class="w-full border-2 border-gray-100 bg-white rounded-full px-5 py-2 focus:outline-none focus:border-[#F29C6E] text-sm font-semibold text-gray-700 shadow-sm transition-colors" />
                 </div>
             `;
             tr.appendChild(tdSubject);
@@ -175,7 +310,7 @@
             // Cột thời gian
             let tdTime = document.createElement('td');
             tdTime.innerHTML = `
-                <input type="time" value="00:00" class="w-full border-2 border-gray-100 bg-white rounded-full px-2 py-3 text-center focus:outline-none focus:border-[#F29C6E] text-xs font-bold text-gray-600 shadow-sm transition-colors" />
+                <input type="time" value="00:00" class="w-full border-2 border-gray-100 bg-white rounded-full px-2 py-2 text-center focus:outline-none focus:border-[#F29C6E] text-xs font-bold text-gray-600 shadow-sm transition-colors" />
             `;
             tr.appendChild(tdTime);
 
@@ -253,9 +388,10 @@
         const applyDatesBtn = document.getElementById('apply-dates');
         const monthDisplay = document.getElementById('month-display');
 
-        // Setup giá trị mặc định cho picker
-        startDateInput.value = '2026-05-21';
-        endDateInput.value = '2026-06-03';
+        // Setup giá trị mặc định cho picker và input công cụ
+        document.getElementById('tool-date-input').value = startValDefault;
+        startDateInput.value = startValDefault;
+        endDateInput.value = endValDefault;
 
         periodBtn.addEventListener('click', (e) => {
             datePickers.classList.toggle('hidden');
@@ -296,6 +432,10 @@
                 return `Tháng ${startMonth}/${startYear} - ${endMonth}/${endYear}`;
             }
         }
+
+        // Khởi tạo hiển thị text giai đoạn và tháng trên giao diện lần đầu tiên
+        periodBtn.innerText = `${formatDateToDDMMYYYY(startValDefault, false)} đến ${formatDateToDDMMYYYY(endValDefault, true)}`;
+        monthDisplay.innerText = getMonthText(startValDefault, endValDefault);
 
         applyDatesBtn.addEventListener('click', () => {
             const start = startDateInput.value;
@@ -361,6 +501,97 @@
             div.innerHTML = `<i data-lucide="star" class="w-6 h-6 text-gray-200 fill-gray-100"></i>`;
             starsContainer.appendChild(div);
         }
+
+        // Xử lý nút "Tạo lịch" từ Top Controls
+        const createCalendarBtn = document.getElementById('create-calendar-btn');
+        const toolDateInput = document.getElementById('tool-date-input');
+
+        createCalendarBtn.addEventListener('click', () => {
+            const startVal = toolDateInput.value;
+            if (!startVal) {
+                alert('Vui lòng chọn ngày để tạo lịch!');
+                return;
+            }
+            
+            // Đồng bộ sang popup chọn ngày
+            startDateInput.value = startVal;
+            
+            // Tính toán ngày kết thúc (13 ngày sau ngày bắt đầu)
+            const dStart = new Date(startVal);
+            const dEnd = new Date(dStart);
+            dEnd.setDate(dStart.getDate() + 13);
+            
+            // Định dạng ngày kết thúc yyyy-mm-dd cho input date
+            const endYear = dEnd.getFullYear();
+            const endMonth = String(dEnd.getMonth() + 1).padStart(2, '0');
+            const endDateDay = String(dEnd.getDate()).padStart(2, '0');
+            const endVal = `${endYear}-${endMonth}-${endDateDay}`;
+            
+            endDateInput.value = endVal;
+            
+            // Trigger nút apply-dates để chạy logic cập nhật lịch
+            applyDatesBtn.click();
+        });
+
+        // Xử lý nút "Tải PDF" từ Top Controls
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        downloadPdfBtn.addEventListener('click', () => {
+            const element = document.getElementById('schedule-board');
+            
+            // Đồng bộ giá trị input hiện tại để html2canvas vẽ được chính xác nội dung người dùng nhập
+            const inputs = element.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.setAttribute('value', input.value);
+            });
+            
+            // Thêm class tạm để reset style hỗ trợ xuất PDF (ví dụ: ẩn nút xóa dòng)
+            element.classList.add('pdf-exporting');
+            
+            // Lấy tên bé từ tiêu đề để đặt tên file xuất PDF phù hợp
+            const titleEl = element.querySelector('h1');
+            let filename = 'lich-hoc.pdf';
+            if (titleEl) {
+                const titleText = titleEl.innerText.trim();
+                if (titleText) {
+                    // Chuyển đổi tên sang dạng viết liền không dấu / gạch ngang thân thiện để lưu file
+                    filename = titleText
+                        .toLowerCase()
+                        .replace(/[^a-z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s-]/g, '')
+                        .trim()
+                        .replace(/\s+/g, '-')
+                        .substring(0, 50) + '.pdf';
+                }
+            }
+
+            const opt = {
+                margin:       4,
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false 
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            // Hiển thị trạng thái đang tải trên nút bấm
+            const originalText = downloadPdfBtn.innerHTML;
+            downloadPdfBtn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Đang tạo PDF...';
+            downloadPdfBtn.disabled = true;
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-exporting');
+                downloadPdfBtn.innerHTML = originalText;
+                downloadPdfBtn.disabled = false;
+            }).catch(err => {
+                console.error('Lỗi khi xuất PDF:', err);
+                alert('Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại.');
+                element.classList.remove('pdf-exporting');
+                downloadPdfBtn.innerHTML = originalText;
+                downloadPdfBtn.disabled = false;
+            });
+        });
 
         // Khởi tạo toàn bộ icon của lucide sau khi DOM render xong
         lucide.createIcons();

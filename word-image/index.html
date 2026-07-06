@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Hình Từ Chữ</title>
+    <!-- Thư viện html2pdf.js để xuất file PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            max-width: 1000px;
+            margin: 0 auto 3rem auto;
+            text-align: center;
+            background: var(--card-bg);
+            padding: 2.5rem 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        select, button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        select {
+            background-color: #f8fafc;
+            cursor: pointer;
+            font-weight: 500;
+            min-width: 140px;
+        }
+
+        select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background-color: white;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .export-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        #export-area {
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+            background: white;
+            padding: 15mm;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border-radius: 8px;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .frames-grid {
+            display: grid;
+            width: 100%;
+            flex: 1; /* Đổ đầy không gian A4 */
+            gap: 15mm;
+        }
+
+        .frames-grid.grid-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .frames-grid.grid-1 .frame-card { max-width: 75%; margin: 0 auto; width: 100%; }
+        .frames-grid.grid-2 { grid-template-columns: 1fr; grid-template-rows: repeat(2, 1fr); }
+        .frames-grid.grid-2 .frame-card { max-width: 75%; margin: 0 auto; width: 100%; }
+        .frames-grid.grid-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .frames-grid.grid-6 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .frames-grid.grid-9 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 10mm; }
+        .frames-grid.grid-12 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8mm; }
+
+        /* Tối ưu tỉ lệ hiển thị ảnh cho khung 6, 9, 12 (giảm padding để nhường không gian cho ảnh) */
+        .frames-grid.grid-6 .frame-card { gap: 0.75rem; padding: 1rem; }
+        .frames-grid.grid-9 .frame-card,
+        .frames-grid.grid-12 .frame-card {
+            padding: 0.75rem;
+            gap: 0.5rem;
+        }
+        .frames-grid.grid-9 .input-wrapper input[type="text"],
+        .frames-grid.grid-12 .input-wrapper input[type="text"],
+        .frames-grid.grid-9 .search-btn,
+        .frames-grid.grid-12 .search-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+        .frames-grid.grid-9 .input-group label,
+        .frames-grid.grid-12 .input-group label {
+            font-size: 0.8rem;
+        }
+
+        .frame-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+            break-inside: avoid;
+            height: 100%;
+        }
+
+        .frame-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: #cbd5e1;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .input-wrapper input[type="text"] {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background-color: #f8fafc;
+            color: #0f172a;
+            min-width: 0;
+        }
+
+        .input-wrapper input[type="text"]:focus {
+            border-color: var(--primary-color);
+            background-color: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .image-container {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background-color: #f1f5f9;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #cbd5e1;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .frame-card:hover .image-container {
+            border-color: #94a3b8;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .placeholder-text {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: absolute;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .header {
+                padding: 1.5rem 1rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .frames-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            button {
+                justify-content: center;
+            }
+        }
+
+        /* PDF Styles override */
+        .pdf-exporting {
+            background-color: white;
+        }
+        .pdf-exporting #export-area {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+        
+        .pdf-exporting .frame-card {
+            box-shadow: none !important;
+            transform: none !important;
+            border: none !important;
+            background: none !important;
+            padding: 0.5rem !important;
+        }
+
+        .pdf-exporting .input-group label,
+        .pdf-exporting .input-group .input-wrapper {
+            display: none !important;
+        }
+
+        .pdf-text {
+            display: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1e293b;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .pdf-exporting .pdf-text {
+            display: block !important;
+        }
+
+        .pdf-exporting .image-container {
+            border: none !important;
+            background: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Tạo Hình Hoạt Hình</h1>
+        <p class="subtitle">Nhập từ khóa và AI sẽ tự động tạo hình hoạt hình cho bạn. Dễ dàng xuất PDF!</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="frameCount">Số lượng khung hiển thị:</label>
+                <select id="frameCount">
+                    <option value="1">1 Khung</option>
+                    <option value="2">2 Khung</option>
+                    <option value="3">3 Khung</option>
+                    <option value="4" selected>4 Khung</option>
+                    <option value="5">5 Khung</option>
+                    <option value="6">6 Khung</option>
+                    <option value="7">7 Khung</option>
+                    <option value="8">8 Khung</option>
+                    <option value="9">9 Khung</option>
+                    <option value="10">10 Khung</option>
+                    <option value="11">11 Khung</option>
+                    <option value="12">12 Khung</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="layoutSelect">Bố cục in (Chia ô):</label>
+                <select id="layoutSelect">
+                    <option value="1">1 Ô (Giữa giấy)</option>
+                    <option value="2">2 Ô (2 hàng dọc)</option>
+                    <option value="4" selected>4 Ô (2x2)</option>
+                    <option value="6">6 Ô (3 hàng, 2 cột)</option>
+                    <option value="9">9 Ô (3x3)</option>
+                    <option value="12">12 Ô (4x3)</option>
+                </select>
+            </div>
+            
+            <button id="downloadPdfBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Tải PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Khu vực này sẽ được xuất ra file PDF -->
+    <div class="export-wrapper">
+        <div id="export-area">
+            <div class="frames-grid grid-4" id="framesContainer">
+                <!-- Các khung (frames) sẽ được tạo bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const frameCountSelect = document.getElementById('frameCount');
+            const layoutSelect = document.getElementById('layoutSelect');
+            const framesContainer = document.getElementById('framesContainer');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+            // Hàm debounce để giảm tần suất gọi API khi người dùng đang gõ
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Hàm xử lý tạo hình ảnh dựa vào chữ
+            async function generateImage(inputElement, imgElement, placeholderElement, spinnerElement) {
+                const text = inputElement.value.trim();
+                
+                if (text === '') {
+                    imgElement.style.display = 'none';
+                    spinnerElement.style.display = 'none';
+                    placeholderElement.style.display = 'block';
+                    placeholderElement.textContent = 'Hình ảnh sẽ hiện ở đây';
+                    imgElement.src = '';
+                    return;
+                }
+
+                // Hiển thị vòng xoay tải (spinner), ẩn placeholder và hình ảnh cũ
+                placeholderElement.style.display = 'none';
+                imgElement.style.display = 'none';
+                spinnerElement.style.display = 'block';
+
+                try {
+                    // 1. Tự động dịch từ tiếng Việt sang tiếng Anh qua MyMemory API để tránh lỗi CORS khi chạy file://
+                    let englishText = text;
+                    try {
+                        const translateUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=vi|en`;
+                        const translationRes = await fetch(translateUrl);
+                        const translationData = await translationRes.json();
+                        if (translationData && translationData.responseData && translationData.responseData.translatedText) {
+                            englishText = translationData.responseData.translatedText;
+                        }
+                    } catch (e) {
+                        console.warn("Không thể dịch, sẽ dùng từ gốc", e);
+                    }
+
+                    // 2. Sử dụng API của pollinations.ai để tạo hình
+                    const prompt = encodeURIComponent(`cartoon, flat vector illustration of ${englishText}, simple background, colorful`);
+                    const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=400&height=400&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+
+                    // 3. Tải hình ảnh dưới dạng Blob để tránh lỗi CORS khi tải PDF hoặc khi mở file cục bộ
+                    let imageRes;
+                    try {
+                        imageRes = await fetch(imageUrl);
+                        if (!imageRes.ok) throw new Error("Lỗi HTTP tải ảnh gốc");
+                    } catch(e) {
+                        // Nếu bị lỗi CORS hoặc mạng, dùng proxy công cộng miễn phí
+                        imageRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(imageUrl)}`);
+                    }
+                    
+                    if (!imageRes.ok) throw new Error("Không thể tải ảnh");
+                    const blob = await imageRes.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    
+                    // Xóa url cũ để giải phóng bộ nhớ
+                    if (imgElement.dataset.blobUrl) {
+                        URL.revokeObjectURL(imgElement.dataset.blobUrl);
+                    }
+                    imgElement.dataset.blobUrl = objectUrl;
+
+                    // Gán hình ảnh
+                    imgElement.onload = function() {
+                        spinnerElement.style.display = 'none';
+                        imgElement.style.display = 'block';
+                    };
+                    
+                    imgElement.onerror = function() {
+                        spinnerElement.style.display = 'none';
+                        placeholderElement.style.display = 'block';
+                        placeholderElement.textContent = 'Lỗi hiển thị hình ảnh.';
+                    };
+
+                    imgElement.src = objectUrl;
+                    
+                } catch (error) {
+                    console.error("Image gen error:", error);
+                    spinnerElement.style.display = 'none';
+                    placeholderElement.style.display = 'block';
+                    placeholderElement.textContent = 'Lỗi hệ thống khi tải ảnh. Kiểm tra mạng.';
+                }
+            }
+
+            const debouncedGenerateImage = debounce(generateImage, 1200);
+
+            // Hàm tạo một khung (frame)
+            function createFrame(index) {
+                const card = document.createElement('div');
+                card.className = 'frame-card';
+
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+                
+                const label = document.createElement('label');
+                label.textContent = `Nội dung khung ${index + 1}`;
+                
+                const inputWrapper = document.createElement('div');
+                inputWrapper.className = 'input-wrapper';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Nhập từ khóa (vd: dog, cat...)';
+                
+                const searchBtn = document.createElement('button');
+                searchBtn.textContent = 'Tìm';
+                searchBtn.type = 'button';
+
+                const pdfText = document.createElement('div');
+                pdfText.className = 'pdf-text';
+
+                inputWrapper.appendChild(input);
+                inputWrapper.appendChild(searchBtn);
+
+                inputGroup.appendChild(label);
+                inputGroup.appendChild(inputWrapper);
+                inputGroup.appendChild(pdfText);
+
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder-text';
+                placeholder.textContent = 'Hình ảnh sẽ hiện ở đây';
+
+                const spinner = document.createElement('div');
+                spinner.className = 'loading-spinner';
+
+                const img = document.createElement('img');
+                img.alt = `Hình cho khung ${index + 1}`;
+                // Đã bỏ crossOrigin vì dùng Blob để tương thích với local file
+
+                imageContainer.appendChild(placeholder);
+                imageContainer.appendChild(spinner);
+                imageContainer.appendChild(img);
+
+                card.appendChild(inputGroup);
+                card.appendChild(imageContainer);
+
+                // Hàm thực thi tìm kiếm
+                const doSearch = () => {
+                    generateImage(input, img, placeholder, spinner);
+                };
+
+                // Lắng nghe sự kiện người dùng bấm nút Tìm
+                searchBtn.addEventListener('click', doSearch);
+
+                // Lắng nghe sự kiện người dùng nhấn Enter
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        doSearch();
+                    }
+                });
+
+                return card;
+            }
+
+            // Hàm vẽ và cập nhật số lượng khung
+            function renderFrames() {
+                const count = parseInt(frameCountSelect.value, 10);
+                const layout = parseInt(layoutSelect.value, 10);
+                
+                // Cập nhật layout lưới
+                framesContainer.className = `frames-grid grid-${layout}`;
+                
+                const currentFrames = framesContainer.children.length;
+                
+                // Thêm khung nếu cần
+                if (count > currentFrames) {
+                    for (let i = currentFrames; i < count; i++) {
+                        const frame = createFrame(i);
+                        framesContainer.appendChild(frame);
+                    }
+                } 
+                // Xóa bớt khung nếu cần
+                else if (count < currentFrames) {
+                    for (let i = currentFrames - 1; i >= count; i--) {
+                        framesContainer.removeChild(framesContainer.children[i]);
+                    }
+                }
+            }
+
+            // Gọi render lần đầu tiên
+            renderFrames();
+
+            // Cập nhật khi thay đổi số lượng hoặc bố cục
+            frameCountSelect.addEventListener('change', renderFrames);
+            layoutSelect.addEventListener('change', () => {
+                const layout = parseInt(layoutSelect.value, 10);
+                framesContainer.className = `frames-grid grid-${layout}`;
+            });
+
+            // Xử lý nút tải PDF
+            downloadPdfBtn.addEventListener('click', () => {
+                const element = document.getElementById('export-area');
+                
+                // Cập nhật text cho PDF
+                const frames = element.querySelectorAll('.frame-card');
+                frames.forEach(frame => {
+                    const input = frame.querySelector('input[type="text"]');
+                    const pdfText = frame.querySelector('.pdf-text');
+                    if (input && pdfText) {
+                        pdfText.textContent = input.value.trim() || ' ';
+                    }
+                });
+
+                // Thêm class tạm để reset style hỗ trợ xuất PDF đẹp hơn
+                element.classList.add('pdf-exporting');
+                
+                const opt = {
+                    margin:       0,
+                    filename:     'hinh-hoat-hinh.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, // Bắt buộc phải có để hiển thị ảnh từ domain khác
+                        logging: false 
+                    },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Đổi trạng thái nút
+                const originalText = downloadPdfBtn.innerHTML;
+                downloadPdfBtn.innerHTML = '<span class="loading-spinner" style="display:block; width:20px; height:20px; position:static; border-width:2px; margin-right:8px;"></span> Đang tạo PDF...';
+                downloadPdfBtn.disabled = true;
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    element.classList.remove('pdf-exporting');
+                    downloadPdfBtn.innerHTML = originalText;
+                    downloadPdfBtn.disabled = false;
+                }).catch(err => {
+                    console.error('Lỗi khi xuất PDF:', err);
+                    alert('Có lỗi xảy ra khi tạo PDF. Vui lòng kiểm tra lại kết nối mạng.');
+                    element.classList.remove('pdf-exporting');
+                    downloadPdfBtn.innerHTML = originalText;
+                    downloadPdfBtn.disabled = false;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
